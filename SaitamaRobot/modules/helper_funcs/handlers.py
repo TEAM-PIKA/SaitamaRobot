@@ -3,32 +3,30 @@ from SaitamaRobot import ALLOW_EXCL
 from telegram import MessageEntity, Update
 from telegram.ext import CommandHandler, MessageHandler, RegexHandler, Filters
 from time import sleep
-from pyrate_limiter import (
-    BucketFullException,
-    Duration,
-    RequestRate,
-    Limiter,
-    MemoryListBucket
-)
+from pyrate_limiter import (BucketFullException, Duration, RequestRate, Limiter,
+                            MemoryListBucket)
 
 if ALLOW_EXCL:
     CMD_STARTERS = ('/', '!')
 else:
     CMD_STARTERS = ('/',)
 
+
 class AntiSpam:
+
     def __init__(self):
-        Duration.CUSTOM = 15 # Custom duration, 15 seconds
-        self.sec_limit = RequestRate(8, Duration.CUSTOM) # 8 / Per 15 Seconds
-        self.min_limit = RequestRate(20, Duration.MINUTE) # 20 / Per minute
-        self.hour_limit = RequestRate(200, Duration.HOUR) # 200 / Per hour
-        self.daily_limit = RequestRate(1000, Duration.DAY) # 1000 / Per day
+        Duration.CUSTOM = 15  # Custom duration, 15 seconds
+        self.sec_limit = RequestRate(8, Duration.CUSTOM)  # 8 / Per 15 Seconds
+        self.min_limit = RequestRate(20, Duration.MINUTE)  # 20 / Per minute
+        self.hour_limit = RequestRate(200, Duration.HOUR)  # 200 / Per hour
+        self.daily_limit = RequestRate(1000, Duration.DAY)  # 1000 / Per day
         self.limiter = Limiter(
-                               self.sec_limit,
-                               self.min_limit,
-                               self.hour_limit,
-                               self.daily_limit,
-                               bucket_class = MemoryListBucket)
+            self.sec_limit,
+            self.min_limit,
+            self.hour_limit,
+            self.daily_limit,
+            bucket_class=MemoryListBucket)
+
     def check_user(self, user):
         """
         Return True if user is to be ignored else False
@@ -38,8 +36,10 @@ class AntiSpam:
             return False
         except BucketFullException:
             return True
-        
+
+
 SpamChecker = AntiSpam()
+
 
 class CustomCommandHandler(CommandHandler):
 
